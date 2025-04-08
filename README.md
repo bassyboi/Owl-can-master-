@@ -36,6 +36,13 @@ This branch introduces a CANBus-based master-slave section control system for Op
 
 ---
 
+| **Feature**            | **Description**                              | **CAN IDs per Slave** | **Payloads**                              | **Control Type**      |
+|------------------------|----------------------------------------------|-----------------------|-------------------------------------------|-----------------------|
+| All Nozzles On/Off     | Turns all solenoids on or off                | 0x201–0x204          | `[0x02]` = ON, `[0x00]` = OFF              | Global toggle         |
+| Recording Toggle       | Toggles data recording on/off                | 0x301–0x304          | `[0x01]` = ON, `[0x00]` = OFF              | Global or per slave   |
+| Sensitivity Toggle     | Cycles through sensitivity levels (0–10)     | 0x401–0x404          | `[0x00–0x0A]` (0–10 sensitivity levels)     | Global cycle          |
+| Spot Spray Enable      | Enables/disables OWL spray logic             | 0x501–0x504          | `[0x01]` = ON, `[0x00]` = OFF              | Per slave toggle      |
+
 ## Setup Instructions
 
 ### 1. Install Dependencies
