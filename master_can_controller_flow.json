@@ -1,114 +1,1094 @@
 [
-  {
-    "id": "master_flow",
-    "type": "tab",
-    "label": "CAN Master Controller",
-    "disabled": false,
-    "info": ""
-  },
-  {
-    "id": "inject1",
-    "type": "inject",
-    "z": "master_flow",
-    "name": "Turn ON Meter 1",
-    "props": [
-      {
-        "p": "meter",
-        "v": "1",
-        "vt": "num"
-      },
-      {
-        "p": "command",
-        "v": "1",
-        "vt": "num"
-      }
-    ],
-    "x": 120,
-    "y": 40,
-    "wires": [["function1"]]
-  },
-  {
-    "id": "inject2",
-    "type": "inject",
-    "z": "master_flow",
-    "name": "Turn OFF Meter 1",
-    "props": [
-      {
-        "p": "meter",
-        "v": "1",
-        "vt": "num"
-      },
-      {
-        "p": "command",
-        "v": "0",
-        "vt": "num"
-      }
-    ],
-    "x": 120,
-    "y": 80,
-    "wires": [["function1"]]
-  },
-  {
-    "id": "inject3",
-    "type": "inject",
-    "z": "master_flow",
-    "name": "Turn ALL ON",
-    "props": [
-      {
-        "p": "meter",
-        "v": "255",
-        "vt": "num"
-      },
-      {
-        "p": "command",
-        "v": "1",
-        "vt": "num"
-      }
-    ],
-    "x": 120,
-    "y": 120,
-    "wires": [["function1"]]
-  },
-  {
-    "id": "inject4",
-    "type": "inject",
-    "z": "master_flow",
-    "name": "Turn ALL OFF",
-    "props": [
-      {
-        "p": "meter",
-        "v": "255",
-        "vt": "num"
-      },
-      {
-        "p": "command",
-        "v": "0",
-        "vt": "num"
-      }
-    ],
-    "x": 120,
-    "y": 160,
-    "wires": [["function1"]]
-  },
-  {
-    "id": "function1",
-    "type": "function",
-    "z": "master_flow",
-    "name": "Build CAN Message",
-    "func": "// Build CAN message for section control\nconst meter = msg.meter;\nconst command = msg.command;\n\nmsg.payload = {\n    id: 0x300,\n    ext: false,\n    data: Buffer.from([meter, command])\n};\nreturn msg;",
-    "outputs": 1,
-    "x": 350,
-    "y": 100,
-    "wires": [["can_out"]]
-  },
-  {
-    "id": "can_out",
-    "type": "socketcan out",
-    "z": "master_flow",
-    "name": "CAN Out",
-    "interface": "can0",
-    "x": 580,
-    "y": 100,
-    "wires": []
-  }
+    {
+        "id": "flow_can_controls",
+        "type": "tab",
+        "label": "CAN Controls",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "tab_can_controls_ui",
+        "type": "ui_tab",
+        "name": "CAN Controls",
+        "icon": "dashboard",
+        "order": 1
+    },
+    {
+        "id": "group_master_global",
+        "type": "ui_group",
+        "name": "Master Global",
+        "tab": "tab_can_controls_ui",
+        "order": 1,
+        "disp": true,
+        "width": "6"
+    },
+    {
+        "id": "group_slave_201",
+        "type": "ui_group",
+        "name": "Slave 0x201",
+        "tab": "tab_can_controls_ui",
+        "order": 2,
+        "disp": true,
+        "width": "6"
+    },
+    {
+        "id": "group_slave_202",
+        "type": "ui_group",
+        "name": "Slave 0x202",
+        "tab": "tab_can_controls_ui",
+        "order": 3,
+        "disp": true,
+        "width": "6"
+    },
+    {
+        "id": "group_slave_203",
+        "type": "ui_group",
+        "name": "Slave 0x203",
+        "tab": "tab_can_controls_ui",
+        "order": 4,
+        "disp": true,
+        "width": "6"
+    },
+    {
+        "id": "group_slave_204",
+        "type": "ui_group",
+        "name": "Slave 0x204",
+        "tab": "tab_can_controls_ui",
+        "order": 5,
+        "disp": true,
+        "width": "6"
+    },
+
+    //---------------------------
+    // Master Global Controls
+    {
+        "id": "btn_global_nozzles_on",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Global Nozzles ON",
+        "group": "group_master_global",
+        "order": 1,
+        "width": "3",
+        "height": "1",
+        "label": "All Nozzles ON",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "2",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 60,
+        "wires": [
+            [
+                "fn_global_nozzles_on"
+            ]
+        ]
+    },
+    {
+        "id": "fn_global_nozzles_on",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Global Nozzles ON",
+        "func": "var cmds = [];\nfor (var id = 0x201; id <= 0x204; id++) {\n    cmds.push({ payload: { id: id, data: [Number(msg.payload)] } });\n}\nreturn [cmds];",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 60,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_global_nozzles_off",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Global Nozzles OFF",
+        "group": "group_master_global",
+        "order": 2,
+        "width": "3",
+        "height": "1",
+        "label": "All Nozzles OFF",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 100,
+        "wires": [
+            [
+                "fn_global_nozzles_off"
+            ]
+        ]
+    },
+    {
+        "id": "fn_global_nozzles_off",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Global Nozzles OFF",
+        "func": "var cmds = [];\nfor (var id = 0x201; id <= 0x204; id++) {\n    cmds.push({ payload: { id: id, data: [Number(msg.payload)] } });\n}\nreturn [cmds];",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 100,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_global_record",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Global Recording",
+        "group": "group_master_global",
+        "order": 3,
+        "width": "3",
+        "height": "1",
+        "label": "Global Recording",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 140,
+        "wires": [
+            [
+                "fn_global_record"
+            ]
+        ]
+    },
+    {
+        "id": "fn_global_record",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Global Recording",
+        "func": "var cmds = [];\nfor (var id = 0x301; id <= 0x304; id++) {\n    cmds.push({ payload: { id: id, data: [Number(msg.payload)] } });\n}\nreturn [cmds];",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 140,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "slider_global_sensitivity",
+        "type": "ui_slider",
+        "z": "flow_can_controls",
+        "name": "Global Sensitivity",
+        "group": "group_master_global",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "label": "Global Sensitivity",
+        "tooltip": "",
+        "min": 0,
+        "max": 10,
+        "passthru": true,
+        "step": 1,
+        "outs": "end",
+        "topic": "",
+        "x": 100,
+        "y": 180,
+        "wires": [
+            [
+                "fn_global_sensitivity"
+            ]
+        ]
+    },
+    {
+        "id": "fn_global_sensitivity",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Global Sensitivity",
+        "func": "var cmds = [];\nfor (var id = 0x401; id <= 0x404; id++) {\n    cmds.push({ payload: { id: id, data: [Number(msg.payload)] } });\n}\nreturn [cmds];",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 180,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_global_spot",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Global Spot Spray",
+        "group": "group_master_global",
+        "order": 5,
+        "width": "3",
+        "height": "1",
+        "label": "Global Spot Spray",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 220,
+        "wires": [
+            [
+                "fn_global_spot"
+            ]
+        ]
+    },
+    {
+        "id": "fn_global_spot",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Global Spot Spray",
+        "func": "var cmds = [];\nfor (var id = 0x501; id <= 0x504; id++) {\n    cmds.push({ payload: { id: id, data: [Number(msg.payload)] } });\n}\nreturn [cmds];",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 220,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+
+    //---------------------------
+    // Slave 0x201 Controls
+    {
+        "id": "btn_slave_201_nozzle_on",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x201 Nozzles ON",
+        "group": "group_slave_201",
+        "order": 1,
+        "width": "3",
+        "height": "1",
+        "label": "Nozzles ON",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "2",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 300,
+        "wires": [
+            [
+                "fn_slave_201_nozzle_on"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_201_nozzle_on",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x201 Nozzles ON",
+        "func": "msg.payload = { id: 0x201, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 300,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_slave_201_nozzle_off",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x201 Nozzles OFF",
+        "group": "group_slave_201",
+        "order": 2,
+        "width": "3",
+        "height": "1",
+        "label": "Nozzles OFF",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 340,
+        "wires": [
+            [
+                "fn_slave_201_nozzle_off"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_201_nozzle_off",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x201 Nozzles OFF",
+        "func": "msg.payload = { id: 0x201, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 340,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_slave_201_record",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x201 Recording",
+        "group": "group_slave_201",
+        "order": 3,
+        "width": "3",
+        "height": "1",
+        "label": "Recording",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 380,
+        "wires": [
+            [
+                "fn_slave_201_record"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_201_record",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x201 Recording",
+        "func": "msg.payload = { id: 0x301, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 380,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "slider_slave_201_sensitivity",
+        "type": "ui_slider",
+        "z": "flow_can_controls",
+        "name": "Slave 0x201 Sensitivity",
+        "group": "group_slave_201",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "label": "Sensitivity",
+        "tooltip": "",
+        "min": 0,
+        "max": 10,
+        "passthru": true,
+        "step": 1,
+        "outs": "end",
+        "topic": "",
+        "x": 100,
+        "y": 420,
+        "wires": [
+            [
+                "fn_slave_201_sensitivity"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_201_sensitivity",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x201 Sensitivity",
+        "func": "msg.payload = { id: 0x401, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 420,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_slave_201_spot",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x201 Spot Spray",
+        "group": "group_slave_201",
+        "order": 5,
+        "width": "3",
+        "height": "1",
+        "label": "Spot Spray",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 460,
+        "wires": [
+            [
+                "fn_slave_201_spot"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_201_spot",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x201 Spot Spray",
+        "func": "msg.payload = { id: 0x501, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 460,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+
+    //---------------------------
+    // Slave 0x202 Controls
+    {
+        "id": "btn_slave_202_nozzle_on",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x202 Nozzles ON",
+        "group": "group_slave_202",
+        "order": 1,
+        "width": "3",
+        "height": "1",
+        "label": "Nozzles ON",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "2",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 540,
+        "wires": [
+            [
+                "fn_slave_202_nozzle_on"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_202_nozzle_on",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x202 Nozzles ON",
+        "func": "msg.payload = { id: 0x202, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 540,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_slave_202_nozzle_off",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x202 Nozzles OFF",
+        "group": "group_slave_202",
+        "order": 2,
+        "width": "3",
+        "height": "1",
+        "label": "Nozzles OFF",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 580,
+        "wires": [
+            [
+                "fn_slave_202_nozzle_off"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_202_nozzle_off",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x202 Nozzles OFF",
+        "func": "msg.payload = { id: 0x202, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 580,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_slave_202_record",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x202 Recording",
+        "group": "group_slave_202",
+        "order": 3,
+        "width": "3",
+        "height": "1",
+        "label": "Recording",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 620,
+        "wires": [
+            [
+                "fn_slave_202_record"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_202_record",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x202 Recording",
+        "func": "msg.payload = { id: 0x302, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 620,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "slider_slave_202_sensitivity",
+        "type": "ui_slider",
+        "z": "flow_can_controls",
+        "name": "Slave 0x202 Sensitivity",
+        "group": "group_slave_202",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "label": "Sensitivity",
+        "tooltip": "",
+        "min": 0,
+        "max": 10,
+        "passthru": true,
+        "step": 1,
+        "outs": "end",
+        "topic": "",
+        "x": 100,
+        "y": 660,
+        "wires": [
+            [
+                "fn_slave_202_sensitivity"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_202_sensitivity",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x202 Sensitivity",
+        "func": "msg.payload = { id: 0x402, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 660,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_slave_202_spot",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x202 Spot Spray",
+        "group": "group_slave_202",
+        "order": 5,
+        "width": "3",
+        "height": "1",
+        "label": "Spot Spray",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 700,
+        "wires": [
+            [
+                "fn_slave_202_spot"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_202_spot",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x202 Spot Spray",
+        "func": "msg.payload = { id: 0x502, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 700,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+
+    //---------------------------
+    // Slave 0x203 Controls
+    {
+        "id": "btn_slave_203_nozzle_on",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x203 Nozzles ON",
+        "group": "group_slave_203",
+        "order": 1,
+        "width": "3",
+        "height": "1",
+        "label": "Nozzles ON",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "2",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 780,
+        "wires": [
+            [
+                "fn_slave_203_nozzle_on"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_203_nozzle_on",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x203 Nozzles ON",
+        "func": "msg.payload = { id: 0x203, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 780,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_slave_203_nozzle_off",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x203 Nozzles OFF",
+        "group": "group_slave_203",
+        "order": 2,
+        "width": "3",
+        "height": "1",
+        "label": "Nozzles OFF",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 820,
+        "wires": [
+            [
+                "fn_slave_203_nozzle_off"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_203_nozzle_off",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x203 Nozzles OFF",
+        "func": "msg.payload = { id: 0x203, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 820,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_slave_203_record",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x203 Recording",
+        "group": "group_slave_203",
+        "order": 3,
+        "width": "3",
+        "height": "1",
+        "label": "Recording",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 860,
+        "wires": [
+            [
+                "fn_slave_203_record"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_203_record",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x203 Recording",
+        "func": "msg.payload = { id: 0x303, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 860,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "slider_slave_203_sensitivity",
+        "type": "ui_slider",
+        "z": "flow_can_controls",
+        "name": "Slave 0x203 Sensitivity",
+        "group": "group_slave_203",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "label": "Sensitivity",
+        "tooltip": "",
+        "min": 0,
+        "max": 10,
+        "passthru": true,
+        "step": 1,
+        "outs": "end",
+        "topic": "",
+        "x": 100,
+        "y": 900,
+        "wires": [
+            [
+                "fn_slave_203_sensitivity"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_203_sensitivity",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x203 Sensitivity",
+        "func": "msg.payload = { id: 0x403, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 900,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_slave_203_spot",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x203 Spot Spray",
+        "group": "group_slave_203",
+        "order": 5,
+        "width": "3",
+        "height": "1",
+        "label": "Spot Spray",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 940,
+        "wires": [
+            [
+                "fn_slave_203_spot"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_203_spot",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x203 Spot Spray",
+        "func": "msg.payload = { id: 0x503, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 940,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+
+    //---------------------------
+    // Slave 0x204 Controls
+    {
+        "id": "btn_slave_204_nozzle_on",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x204 Nozzles ON",
+        "group": "group_slave_204",
+        "order": 1,
+        "width": "3",
+        "height": "1",
+        "label": "Nozzles ON",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "2",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 1020,
+        "wires": [
+            [
+                "fn_slave_204_nozzle_on"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_204_nozzle_on",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x204 Nozzles ON",
+        "func": "msg.payload = { id: 0x204, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 1020,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_slave_204_nozzle_off",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x204 Nozzles OFF",
+        "group": "group_slave_204",
+        "order": 2,
+        "width": "3",
+        "height": "1",
+        "label": "Nozzles OFF",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 1060,
+        "wires": [
+            [
+                "fn_slave_204_nozzle_off"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_204_nozzle_off",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x204 Nozzles OFF",
+        "func": "msg.payload = { id: 0x204, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 1060,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_slave_204_record",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x204 Recording",
+        "group": "group_slave_204",
+        "order": 3,
+        "width": "3",
+        "height": "1",
+        "label": "Recording",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 1100,
+        "wires": [
+            [
+                "fn_slave_204_record"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_204_record",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x204 Recording",
+        "func": "msg.payload = { id: 0x304, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 1100,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "slider_slave_204_sensitivity",
+        "type": "ui_slider",
+        "z": "flow_can_controls",
+        "name": "Slave 0x204 Sensitivity",
+        "group": "group_slave_204",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "label": "Sensitivity",
+        "tooltip": "",
+        "min": 0,
+        "max": 10,
+        "passthru": true,
+        "step": 1,
+        "outs": "end",
+        "topic": "",
+        "x": 100,
+        "y": 1140,
+        "wires": [
+            [
+                "fn_slave_204_sensitivity"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_204_sensitivity",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x204 Sensitivity",
+        "func": "msg.payload = { id: 0x404, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 1140,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_slave_204_spot",
+        "type": "ui_button",
+        "z": "flow_can_controls",
+        "name": "Slave 0x204 Spot Spray",
+        "group": "group_slave_204",
+        "order": 5,
+        "width": "3",
+        "height": "1",
+        "label": "Spot Spray",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 100,
+        "y": 1180,
+        "wires": [
+            [
+                "fn_slave_204_spot"
+            ]
+        ]
+    },
+    {
+        "id": "fn_slave_204_spot",
+        "type": "function",
+        "z": "flow_can_controls",
+        "name": "Format Slave 0x204 Spot Spray",
+        "func": "msg.payload = { id: 0x504, data: [Number(msg.payload)] };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 1180,
+        "wires": [
+            [
+                "socketcan_out"
+            ]
+        ]
+    },
+
+    //---------------------------
+    // SocketCAN TX Node
+    {
+        "id": "socketcan_out",
+        "type": "socketcan-out",
+        "z": "flow_can_controls",
+        "name": "CAN TX",
+        "interface": "can0",
+        "x": 520,
+        "y": 700,
+        "wires": []
+    }
 ]
