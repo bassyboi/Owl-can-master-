@@ -1,0 +1,114 @@
+[
+  {
+    "id": "master_flow",
+    "type": "tab",
+    "label": "CAN Master Controller",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "inject1",
+    "type": "inject",
+    "z": "master_flow",
+    "name": "Turn ON Meter 1",
+    "props": [
+      {
+        "p": "meter",
+        "v": "1",
+        "vt": "num"
+      },
+      {
+        "p": "command",
+        "v": "1",
+        "vt": "num"
+      }
+    ],
+    "x": 120,
+    "y": 40,
+    "wires": [["function1"]]
+  },
+  {
+    "id": "inject2",
+    "type": "inject",
+    "z": "master_flow",
+    "name": "Turn OFF Meter 1",
+    "props": [
+      {
+        "p": "meter",
+        "v": "1",
+        "vt": "num"
+      },
+      {
+        "p": "command",
+        "v": "0",
+        "vt": "num"
+      }
+    ],
+    "x": 120,
+    "y": 80,
+    "wires": [["function1"]]
+  },
+  {
+    "id": "inject3",
+    "type": "inject",
+    "z": "master_flow",
+    "name": "Turn ALL ON",
+    "props": [
+      {
+        "p": "meter",
+        "v": "255",
+        "vt": "num"
+      },
+      {
+        "p": "command",
+        "v": "1",
+        "vt": "num"
+      }
+    ],
+    "x": 120,
+    "y": 120,
+    "wires": [["function1"]]
+  },
+  {
+    "id": "inject4",
+    "type": "inject",
+    "z": "master_flow",
+    "name": "Turn ALL OFF",
+    "props": [
+      {
+        "p": "meter",
+        "v": "255",
+        "vt": "num"
+      },
+      {
+        "p": "command",
+        "v": "0",
+        "vt": "num"
+      }
+    ],
+    "x": 120,
+    "y": 160,
+    "wires": [["function1"]]
+  },
+  {
+    "id": "function1",
+    "type": "function",
+    "z": "master_flow",
+    "name": "Build CAN Message",
+    "func": "// Build CAN message for section control\nconst meter = msg.meter;\nconst command = msg.command;\n\nmsg.payload = {\n    id: 0x300,\n    ext: false,\n    data: Buffer.from([meter, command])\n};\nreturn msg;",
+    "outputs": 1,
+    "x": 350,
+    "y": 100,
+    "wires": [["can_out"]]
+  },
+  {
+    "id": "can_out",
+    "type": "socketcan out",
+    "z": "master_flow",
+    "name": "CAN Out",
+    "interface": "can0",
+    "x": 580,
+    "y": 100,
+    "wires": []
+  }
+]
